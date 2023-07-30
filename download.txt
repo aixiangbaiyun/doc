@@ -1,0 +1,40 @@
+@GetMapping("/downloadlist")
+    public void downLoadList(  HttpServletResponse response ) throws UnsupportedEncodingException {
+
+        List<String> pathList=new ArrayList<>();
+        pathList.add("xxx.txt");
+        pathList.add("xxx.txt");
+        pathList.add("xxx.txt");
+
+        response.reset();
+        response.setHeader("Content-Disposition","attachment; filename=" + URLEncoder.encode("1.zip", "UTF-8"));
+        response.setCharacterEncoding("utf-8");
+
+        response.setContentType("application/octet-stream");
+
+        try(ZipOutputStream zipOutputStream=new ZipOutputStream(new BufferedOutputStream(response.getOutputStream())))
+        {
+            for(String pathName:pathList)
+            {
+                File file =new File(pathName);
+                String fileName=file.getName();
+                zipOutputStream.putNextEntry(new ZipEntry(fileName));
+                try(BufferedInputStream bis=new BufferedInputStream(new FileInputStream(file))){
+                    byte[] bytes = new byte[1024];
+                    int i=0;
+                    while((i=bis.read(bytes))!=-1)
+                    {
+                        zipOutputStream.write(bytes,0,i);
+                    }
+                    zipOutputStream.closeEntry();
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
